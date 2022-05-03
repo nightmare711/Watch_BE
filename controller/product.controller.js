@@ -35,13 +35,29 @@ exports.getProduct = async (req,res,next) => {
     }
 }
 
+exports.getRelatedProduct = (req,res,next) => {
+    const {type} = req.params
+    return Product.find({
+        type
+    }).then(result => {
+        return res.status(200).json({
+            message: 'successful',
+            success:true,
+            data: result
+        })
+    }).catch(err => res.status(500).json({
+        message: err.message,
+        success: false
+    }))
+}
+
 exports.getProductById = (req,res,next) => {
     const id = req.params.productId
     return Product.findById(id).then(result => {
         return res.status(200).json({
             message: 'successful',
             success: true,
-            result: result
+            data: result
         })
     }).catch(err => res.status(500).json({
         message: err.message,

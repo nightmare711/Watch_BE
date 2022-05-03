@@ -5,5 +5,6 @@ const route = express.Router()
 
 route.get('/', OrderController.getOrder)
 route.post('/', OrderController.orderProduct)
+route.post('/delete/:id', OrderController.deleteOrder)
 
 module.exports = route

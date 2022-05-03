@@ -3,14 +3,19 @@ const Product = require('../model/Product')
 
 exports.orderProduct = async (req,res,next) => {
     const {user_name, address, products, phone_number, total, message} = req.body
-    for(let i = 0; i < productIds.length; i++) {
+    for(let i = 0; i < products.length; i++) {
         const product = await Product.findById(products[i].id)
-        if(product.quantity - products[i].amount >= 0) {
+        if(product.quantity - products[i].amount < 0) {
             return res.status(303).json({
-                message: `${productIds[i]} not enough quantity`,
+                message: `${products[i].id} not enough quantity`,
                 success:false
             })
         }
+    }
+    for(let i = 0; i < products.length; i++) {
+        const product = await Product.findById(products[i].id)
+        product.quantity = product.quantity - products[i].amount
+        await product.save()
     }
     const order = new Order({user_name, address, products, phone_number, total, message})
         return order.save().then(result => res.status(200).json({
@@ -23,14 +28,20 @@ exports.orderProduct = async (req,res,next) => {
         }))
 }
 
+exports.deleteOrder = (req,res,next) => {
+    const id = req.params.id
+    return Order.findByIdAndDelete(id).then(result => res.status(201).json({
+        message:'successful',
+        success:true
+    })).catch(err => res.status(500).json({
+        message: err.message,
+        success:false
+    }))
+}
+
 exports.getOrder = (req,res,next) => {
     return Order.find().then(async (orders) => {
-        for(let i = 0; i < orders.length; i++) {
-            for(let j = 0; j < orders[i].products; j++) {
-                const product = await Product.findById(orders[i].products[j].id)
-                orders[i].products[j] = {...orders[i].products[j],...product}
-            }
-        }
+        
         return res.status(200).json({
             message: 'successful',
             success:true,

@@ -4,6 +4,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const ProductRoute = require('./routes/product.route')
 const OrderRoute = require('./routes/order.route')
+const EmailRoute = require('./routes/email.route')
 
 const app = express()
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json({
 }))
 app.use('/products', ProductRoute)
 app.use('/orders', OrderRoute)
+app.use('/contact', EmailRoute)
 
 
 mongoose.connect('mongodb+srv://tranhoang:KoOn711286@cluster0.8gw14.mongodb.net/Watch').then(() => app.listen(process.env.PORT || 4000, () => console.log('app listen at port 4000'))).catch(err => console.log(err))
