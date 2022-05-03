@@ -13,4 +13,4 @@ Backend for Watch FE
     cp .env.production .env
 ```
 
-### Made by Vuong Thi Thu Trang with luv
+### Made by Hoang Tran with luv
