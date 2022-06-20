@@ -13,7 +13,6 @@ exports.getEmail = (req,res,next) => {
 
 exports.postEmail = (req,res,next) => {
     
-    
     const {name, email, message} = req.body
     const emailInstance = new Contact({name, email, message})
 

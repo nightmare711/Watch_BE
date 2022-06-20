@@ -1,4 +1,6 @@
 const Product = require('../model/Product')
+const fs = require('fs')
+
 
 exports.getProduct = async (req,res,next) => {
     try {
@@ -6,8 +8,22 @@ exports.getProduct = async (req,res,next) => {
         const to = req.query.to
         const type = req.query.type
         const data = await Product.find();
+        const dataFormated = []
+        const prefix = 'http://localhost:4000/products/'
+        
+        for(let i = 0; i < data.length; i++) {
+            const imgFormat = []
+            for(let j = 0; j < data[i].imgPath.length; j++) {
+                imgFormat.push(prefix + data[i]._id + '/' + j)
+                console.log(imgFormat)
+            }
+            dataFormated.push({
+                ...data[i]._doc,
+                imgPath: imgFormat
+            })
+        }
         if(from && to) {
-            const dataFilter = data.filter(item => item.price >= parseInt(from) && item.price <= parseInt(to))
+            const dataFilter = dataFormated.filter(item => item.price >= parseInt(from) && item.price <= parseInt(to))
             return res.status(200).json({
                 message: "successful",
                 success: true,
@@ -15,7 +31,8 @@ exports.getProduct = async (req,res,next) => {
             });
         }
         if(type) {
-            const dataFilter = data.filter(item => item.type === type)
+            const dataFilter = dataFormated.filter(item => item.type === type)
+            
             return res.status(200).json({
                 message: "successful",
                 success: true,
@@ -25,7 +42,7 @@ exports.getProduct = async (req,res,next) => {
         return res.status(200).json({
             message: "successful",
             success: true,
-            data: data
+            data: dataFormated
         });
     }catch (err) {
         return res.status(500).json({
@@ -68,7 +85,16 @@ exports.getProductById = (req,res,next) => {
 
 
 exports.createProduct = (req,res,next) => {
-    const {name, type, price, description, discount, quantity, imgPath} = req.body
+    console.log(req)
+    const files = req.files
+    const imgPath = []
+    for(let i = 0; i < files.length; i++) {
+        const img = fs.readFileSync(files[i].path)
+        var encode_image = img.toString('base64');
+        const imgBuffer = new Buffer(encode_image,'base64')
+        imgPath.push(imgBuffer)
+    }
+    const {name, type, price, description, discount, quantity} = req.body
     return Product.findOne({name: name}).then(result => {
         if(result) {
             return res.status(401).json({
@@ -123,4 +149,12 @@ exports.updateProduct = (req,res,next) => {
         message: err.message,
         success:false
     }))
+}
+exports.getPhoto = (req,res) => {
+    var id = req.params.id;
+    const indexImage = req.params.indexImage || 0;
+    return Product.findById(id).then(result => {
+        res.contentType('image/jpeg');
+        res.send(result.imgPath[indexImage].buffer)
+    })
 }
